@@ -80,6 +80,25 @@ with httpx.Client(headers={'X-API-Key': os.environ['RELAY_API_KEY']}, timeout=12
 
 ## Contract
 
+### Current VPS deployment
+
+The production URL is `https://relay.jetourtools.com`. The checkout lives at
+`/home/ubuntu/apps/telegram_relay`; its private `.env` stores the API key.
+The existing `webadb-nginx-1` container terminates HTTPS on port 443 and reaches
+the relay through the external `webadb_default` Docker network.
+
+```sh
+cd ~/apps/telegram_relay
+docker compose -f compose.yaml -f compose.nginx.yaml up -d --build
+```
+
+The relay server blocks in `deploy/` are appended to the existing Nginx template
+and its rendered configuration. Backups are in `nginx-backup-*` on the VPS.
+`deploy/install-nginx.sh` is a first-install script; it refuses to duplicate a
+configured domain. Existing Certbot handles renewal; a user cron job checks the
+relay certificate hourly and gracefully reloads Nginx only if it changes.
+Retrieve the relay API key privately over SSH from `.env`; do not commit it.
+
 - `GET /health`: unauthenticated process health; does not check Telegram connectivity.
 - `GET|POST /bot<TOKEN>/<METHOD>`: forward query and raw body to Telegram.
 - `GET /file/bot<TOKEN>/<FILE_PATH>`: stream a file using the path from `getFile`.

@@ -1,0 +1,11 @@
+services:
+  relay:
+    networks:
+      default:
+      edge:
+        aliases:
+          - telegram-relay
+networks:
+  edge:
+    external: true
+    name: webadb_default
